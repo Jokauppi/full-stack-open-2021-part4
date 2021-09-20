@@ -33,3 +33,55 @@ describe('total likes', () => {
 
 
 })
+
+describe('favorite blog', () => {
+
+	const blogList = [
+		{
+			'title': 'example1',
+			'author': 'blogger1',
+			'url': 'blog.example1',
+			'likes': 1,
+			'id': '1'
+		},
+		{
+			'title': 'example2',
+			'author': 'blogger2',
+			'url': 'blog.example2',
+			'likes': 2,
+			'id': '2'
+		},
+		{
+			'title': 'example3',
+			'author': 'blogger3',
+			'url': 'blog.example3',
+			'likes': 3,
+			'id': '3'
+		}
+	]
+
+	test('should be null when list is empty', () => {
+		expect(listHelper.favoriteBlog([])).toEqual(null)
+	})
+
+	test('should be the only blog when list has lenght of 1', () => {
+		expect(listHelper.favoriteBlog([blogList[0]])).toEqual({
+			'title': 'example1',
+			'author': 'blogger1',
+			'url': 'blog.example1',
+			'likes': 1,
+			'id': '1'
+		})
+	})
+
+	test('should be the blog with most likes when list has several blogs', () => {
+		expect(listHelper.favoriteBlog(blogList)).toEqual({
+			'title': 'example3',
+			'author': 'blogger3',
+			'url': 'blog.example3',
+			'likes': 3,
+			'id': '3'
+		})
+	})
+
+})
