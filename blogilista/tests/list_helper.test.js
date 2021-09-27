@@ -85,3 +85,104 @@ describe('favorite blog', () => {
 	})
 
 })
+
+describe('Most blogs', () => {
+
+	const blogList = [
+		{
+			'title': 'example1',
+			'author': 'blogger1',
+			'url': 'blog.example1',
+			'likes': 1,
+			'id': '1'
+		},
+		{
+			'title': 'example2',
+			'author': 'blogger1',
+			'url': 'blog.example2',
+			'likes': 2,
+			'id': '2'
+		},
+		{
+			'title': 'example3',
+			'author': 'blogger3',
+			'url': 'blog.example3',
+			'likes': 3,
+			'id': '3'
+		}
+	]
+
+	test('should be by author with most blogs', () => {
+		expect(listHelper.mostBlogs(blogList)).toEqual({
+			'author': 'blogger1',
+			'blogs': 2
+		})
+	})
+
+	test('should be by the only author when list has 1 blog', () => {
+		expect(listHelper.mostBlogs([blogList[0]])).toEqual({
+			'author': 'blogger1',
+			'blogs': 1
+		})
+	})
+
+	test('should be null when list is empty', () => {
+		expect(listHelper.mostBlogs([])).toBe(null)
+	})
+
+})
+
+describe('Most liked author', () => {
+
+	const blogList = [
+		{
+			'title': 'example1',
+			'author': 'blogger1',
+			'url': 'blog.example1',
+			'likes': 2,
+			'id': '1'
+		},
+		{
+			'title': 'example2',
+			'author': 'blogger1',
+			'url': 'blog.example2',
+			'likes': 2,
+			'id': '2'
+		},
+		{
+			'title': 'example3',
+			'author': 'blogger3',
+			'url': 'blog.example3',
+			'likes': 3,
+			'id': '3'
+		}
+	]
+
+	test('should be one with most total likes', () => {
+		expect(listHelper.mostLikes(blogList)).toEqual({
+			'author': 'blogger1',
+			'likes': 4
+		})
+	})
+
+	test('should be one with the most liked blog when authors do not have multiple blogs', () => {
+		expect(listHelper.mostLikes(blogList.slice(1,3))).toEqual({
+			'author': 'blogger3',
+			'likes': 3
+		})
+	})
+
+	test('should be the only author when list has 1 blog', () => {
+		expect(listHelper.mostLikes([blogList[0]])).toEqual({
+			'author': 'blogger1',
+			'likes': 2
+		})
+	})
+
+	test('should be null when list is empty', () => {
+		expect(listHelper.mostLikes([])).toBe(null)
+	})
+
+})
+
+
