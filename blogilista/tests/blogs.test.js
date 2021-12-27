@@ -23,8 +23,14 @@ describe('When there are blogs in the database', () => {
 
     test('all blogs are returned', async () => {
         let response = await api.get('/api/blogs')
-
+        console.log(response);
         expect(response.body).toHaveLength(resource.initialBlogs.length)
+    })
+
+    test('returned blogs have attribute id', async () => {
+        let response = await api.get('/api/blogs')
+
+        expect(response.body[0].id).toBeDefined()
     })
 
 })
