@@ -50,13 +50,16 @@ describe('When adding a blog', () => {
   })
 
   test('amount of blogs should increase', async () => {
-    await api.post('/api/blogs').send(newBlog).expect(201)
+    await api.post('/api/blogs')
+      .send(newBlog)
+      .expect(201)
 
     expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length + 1)
   })
 
   test('database should contain added blog', async () => {
-    await api.post('/api/blogs').send(newBlog)
+    await api.post('/api/blogs')
+      .send(newBlog)
 
     expect((await resource.getBlogs()).some(blog =>
       blog.title === newBlog.title &&
@@ -67,11 +70,16 @@ describe('When adding a blog', () => {
   })
 
   test('likes is set to 0 when not specified', async () => {
-    let response = await api.post('/api/blogs').send(
-      {title: "blog", author: "blogger", url: "blog.example"}
-    )
+    let response = await api.post('/api/blogs')
+      .send({title: "blog", author: "blogger", url: "blog.example"})
 
     expect(response.body.likes).toEqual(0)
+  })
+
+  test('returns 400 Bad Request when title and url are missing', async () => {
+    let response = await api.post('/api/blogs')
+      .send({author: "blogger"})
+      .expect(400)
   })
 
 })
