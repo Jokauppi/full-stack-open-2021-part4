@@ -95,7 +95,7 @@ describe('When deleting a blog', () => {
     let blogs = await resource.getBlogs()
 
     await api.delete(`/api/blogs/${blogs[0].id}`).expect(204)
-    
+
     expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length - 1)
   })
 
@@ -105,6 +105,37 @@ describe('When deleting a blog', () => {
     await api.delete(`/api/blogs/${blogs[0].id}`)
 
     expect(await resource.getBlogs()).not.toContainEqual(blogs[0])
+  })
+
+})
+
+describe('When updating a blog', () => {
+
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(resource.initialBlogs)
+  })
+
+  test('amount of blogs should stay the same', async () => {
+    let blogs = await resource.getBlogs()
+    blogs[0].url = 'newurl.example'
+    
+    await api.put(`/api/blogs/${blogs[0].id}`)
+      .send(blogs[0])
+      .expect(200)
+
+    console.log(blogs[0])
+    expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length)
+  })
+
+  test('database should contain updated blog', async () => {
+    let blogs = await resource.getBlogs()
+    blogs[0].url = 'newurl.example'
+    
+    await api.put(`/api/blogs/${blogs[0].id}`)
+      .send(blogs[0])
+
+    expect(await resource.getBlogs()).toContainEqual(blogs[0])
   })
 
 })
