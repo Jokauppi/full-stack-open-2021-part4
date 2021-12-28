@@ -44,24 +44,34 @@ describe('When adding a blog', () => {
     likes: 0
   }
 
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(resource.initialBlogs)
+  })
+
   test('amount of blogs should increase', async () => {
-    await api.post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
+    await api.post('/api/blogs').send(newBlog).expect(201)
 
     expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length + 1)
   })
 
   test('database should contain added blog', async () => {
-    await api.post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
+    await api.post('/api/blogs').send(newBlog)
 
     expect((await resource.getBlogs()).some(blog =>
       blog.title === newBlog.title &&
       blog.author === newBlog.author &&
-      blog.url === newBlog.url
+      blog.url === newBlog.url &&
+      blog.likes === newBlog.likes
     )).toBe(true)
+  })
+
+  test('likes is set to 0 when not specified', async () => {
+    let response = await api.post('/api/blogs').send(
+      {title: "blog", author: "blogger", url: "blog.example"}
+    )
+
+    expect(response.body.likes).toEqual(0)
   })
 
 })
