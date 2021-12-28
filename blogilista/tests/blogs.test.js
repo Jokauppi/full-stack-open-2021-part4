@@ -84,6 +84,31 @@ describe('When adding a blog', () => {
 
 })
 
+describe('When deleting a blog', () => {
+
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(resource.initialBlogs)
+  })
+
+  test('amount of blogs should decrease', async () => {
+    let blogs = await resource.getBlogs()
+
+    await api.delete(`/api/blogs/${blogs[0].id}`).expect(204)
+    
+    expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length - 1)
+  })
+
+  test('database should not contain deleted blog', async () => {
+    let blogs = await resource.getBlogs()
+    
+    await api.delete(`/api/blogs/${blogs[0].id}`)
+
+    expect(await resource.getBlogs()).not.toContainEqual(blogs[0])
+  })
+
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
