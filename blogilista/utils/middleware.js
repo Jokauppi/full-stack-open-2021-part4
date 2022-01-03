@@ -2,32 +2,32 @@ const logger = require('./logger')
 const morgan = require('morgan')
 
 morgan.token('blog', (req) => {
-	if (req.method === 'POST') {
-		return JSON.stringify(req.body)
-	}
-	return ' '
+  if (req.method === 'POST') {
+    return JSON.stringify(req.body)
+  }
+  return ' '
 })
 
 const requestLogger = (morgan(':method :url :status :res[content-length] - :response-time ms :blog'))
 
 const unknownEndpoint = (request, response) => {
-	response.status(404).send({ error: 'unknown endpoint' })
+  response.status(404).send({ error: 'unknown endpoint' })
 }
 
 const errorHandler = (err, req, res, next) => {
-	logger.error(err.message)
+  logger.error(err.message)
 
-	if(err.name === 'CastError') {
-		return res.status(400).send({ error: 'malformatted id' })
-	} else if (err.name === 'ValidationError') {
-		return res.status(400).send({ error: err.errors[Object.keys(err.errors)[0]].properties.message })
-	}
+  if(err.name === 'CastError') {
+    return res.status(400).send({ error: 'malformatted id' })
+  } else if (err.name === 'ValidationError') {
+    return res.status(400).send({ error: err.errors[Object.keys(err.errors)[0]].properties.message })
+  }
 
-	next(err)
+  next(err)
 }
 
 module.exports = {
-	requestLogger,
-	unknownEndpoint,
-	errorHandler
+  requestLogger,
+  unknownEndpoint,
+  errorHandler
 }

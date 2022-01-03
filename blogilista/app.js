@@ -12,8 +12,8 @@ const mongoose = require('mongoose')
 const mongoUrl = config.MONGODB_URI
 
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
-	.then(logger.info('db connected'))
-	.catch(error => logger.info('db connection failed\n' + error))
+  .then(logger.info('db connected'))
+  .catch(error => logger.info('db connection failed\n' + error))
 
 app.use(cors())
 app.use(express.json())

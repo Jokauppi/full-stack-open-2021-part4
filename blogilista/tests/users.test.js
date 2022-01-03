@@ -11,33 +11,33 @@ const User = require('../models/user')
 describe('When creating a user', () => {
 
   const newUser = {
-    username: "newuser",
-    password: "password",
-    name: "User New"
+    username: 'newuser',
+    password: 'password',
+    name: 'User New'
   }
 
   beforeEach(async () => {
     await User.deleteMany({})
     await User.insertMany(resource.initialUsers)
   })
-  
+
   test('right status code and data in the right type is returned', async () => {
     await api.post('/api/users')
-    .send(newUser)
+      .send(newUser)
       .expect(201)
       .expect('Content-Type', /application\/json/)
   })
 
   test('the created user is returned', async () => {
-    let response = await api.post('/api/users').send(newUser)
-    
-    let addedUser = response.body
-    
+    const response = await api.post('/api/users').send(newUser)
+
+    const addedUser = response.body
+
     expect(addedUser.username === newUser.username &&
       addedUser.name === newUser.name
-      ).toBe(true)
-    })
-    
+    ).toBe(true)
+  })
+
   test('the amount of users grows', async () => {
     await api.post('/api/users').send(newUser)
 
@@ -57,36 +57,36 @@ describe('When creating a user', () => {
 
 describe('When database contains users', () => {
 
-    beforeEach(async () => {
-      await User.deleteMany({})
-      await User.insertMany(resource.initialUsers)
-    })
-  
-    test('getting users returns right status code and data in the right type', async () => {
-      await api.get('/api/users')
-        .expect(200)
-        .expect('Content-Type', /application\/json/)
-    })
-
-    test('getting users returns right amount of users', async () => {
-      let response = await api.get('/api/users')
-  
-      expect(response.body).toHaveLength(resource.initialUsers.length)
-    })
-
-    test('getting users returns correct data', async () => {
-      let response = await api.get('/api/users')
-      
-      mapUsers = userArray => userArray.map(user => ({username: user.username, name: user.name}))
-
-      let users = mapUsers(response.body) 
-      let expectedUsers = mapUsers(resource.initialUsers)
-
-      expect(users).toEqual(expect.arrayContaining(expectedUsers))
-    })
-  
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
   })
 
-  afterAll(() => {
-    mongoose.connection.close()
+  test('getting users returns right status code and data in the right type', async () => {
+    await api.get('/api/users')
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
   })
+
+  test('getting users returns right amount of users', async () => {
+    const response = await api.get('/api/users')
+
+    expect(response.body).toHaveLength(resource.initialUsers.length)
+  })
+
+  test('getting users returns correct data', async () => {
+    const response = await api.get('/api/users')
+
+    const mapUsers = userArray => userArray.map(user => ({ username: user.username, name: user.name }))
+
+    const users = mapUsers(response.body)
+    const expectedUsers = mapUsers(resource.initialUsers)
+
+    expect(users).toEqual(expect.arrayContaining(expectedUsers))
+  })
+
+})
+
+afterAll(() => {
+  mongoose.connection.close()
+})

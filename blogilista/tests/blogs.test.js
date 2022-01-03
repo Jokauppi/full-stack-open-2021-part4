@@ -38,9 +38,9 @@ describe('When there are blogs in the database', () => {
 describe('When adding a blog', () => {
 
   const newBlog = {
-    title: "blog3",
-    author: "blogger3",
-    url: "blog.3.example",
+    title: 'blog3',
+    author: 'blogger3',
+    url: 'blog.3.example',
     likes: 0
   }
 
@@ -71,14 +71,14 @@ describe('When adding a blog', () => {
 
   test('likes is set to 0 when not specified', async () => {
     let response = await api.post('/api/blogs')
-      .send({title: "blog", author: "blogger", url: "blog.example"})
+      .send({ title: 'blog', author: 'blogger', url: 'blog.example' })
 
     expect(response.body.likes).toEqual(0)
   })
 
   test('returns 400 Bad Request when title and url are missing', async () => {
-    let response = await api.post('/api/blogs')
-      .send({author: "blogger"})
+    await api.post('/api/blogs')
+      .send({ author: 'blogger' })
       .expect(400)
   })
 
@@ -101,7 +101,7 @@ describe('When deleting a blog', () => {
 
   test('database should not contain deleted blog', async () => {
     let blogs = await resource.getBlogs()
-    
+
     await api.delete(`/api/blogs/${blogs[0].id}`)
 
     expect(await resource.getBlogs()).not.toContainEqual(blogs[0])
@@ -119,7 +119,7 @@ describe('When updating a blog', () => {
   test('amount of blogs should stay the same', async () => {
     let blogs = await resource.getBlogs()
     blogs[0].url = 'newurl.example'
-    
+
     await api.put(`/api/blogs/${blogs[0].id}`)
       .send(blogs[0])
       .expect(200)
@@ -130,7 +130,7 @@ describe('When updating a blog', () => {
   test('database should contain updated blog', async () => {
     let blogs = await resource.getBlogs()
     blogs[0].url = 'newurl.example'
-    
+
     await api.put(`/api/blogs/${blogs[0].id}`)
       .send(blogs[0])
 
