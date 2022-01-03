@@ -10,6 +10,12 @@ userRouter.get('/', async (request, response) => {
 userRouter.post('/', async (request, response) => {
   const newUser = request.body
 
+  if (newUser.password.length < 3) {
+    const err = new Error('User validation failed')
+    err.name = 'ValidationError'
+    throw err
+  }
+
   const saltRounds = 10
   const passwordHash = await bcrypt.hash(newUser.password, saltRounds)
 

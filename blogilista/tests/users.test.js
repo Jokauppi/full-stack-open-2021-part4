@@ -53,6 +53,50 @@ describe('When creating a user', () => {
     )).toBe(true)
   })
 
+  test('the right status code and error message are returned when username is missing', async () => {
+    const badUser = {
+      password: 'password',
+      name: 'User New'
+    }
+    const response = await api.post('/api/users').send(badUser).expect(400)
+
+    expect(response.body.error).toEqual('User data invalid')
+  })
+
+  test('the right status code and error message are returned when username is too short', async () => {
+    const badUser = {
+      username: 'u',
+      password: 'password',
+      name: 'User New'
+    }
+    const response = await api.post('/api/users').send(badUser).expect(400)
+
+    expect(response.body.error).toEqual('User data invalid')
+  })
+
+  test('the right status code and error message are returned when username is not unique', async () => {
+    const badUser = {
+      username: 'user1',
+      password: 'password',
+      name: 'User New'
+    }
+
+    const response = await api.post('/api/users').send(badUser).expect(400)
+
+    expect(response.body.error).toEqual('User data invalid')
+  })
+
+  test('the right status code and error message are returned when password is too short', async () => {
+    const badUser = {
+      username: 'newuser',
+      password: 'ps',
+      name: 'User New'
+    }
+    const response = await api.post('/api/users').send(badUser).expect(400)
+
+    expect(response.body.error).toEqual('User data invalid')
+  })
+
 })
 
 describe('When database contains users', () => {
