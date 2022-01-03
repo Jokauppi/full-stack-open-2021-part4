@@ -124,7 +124,6 @@ describe('When updating a blog', () => {
       .send(blogs[0])
       .expect(200)
 
-    console.log(blogs[0])
     expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length)
   })
 

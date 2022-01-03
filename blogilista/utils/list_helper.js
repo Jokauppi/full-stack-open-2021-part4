@@ -19,7 +19,9 @@ const favoriteBlog = (blogs) => {
 	const mostLikes = blogs.reduce(maxLikes, -1)
 	const mostLiked = blogs.find(blog => blog.likes === mostLikes)
 
-	return mostLiked ?? null
+	if (mostLiked !== null && mostLiked !== undefined) return mostLiked
+	
+	return null
 }
 
 const mostBlogs = (blogs) => {
