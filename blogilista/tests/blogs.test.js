@@ -7,10 +7,13 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 describe('When there are blogs in the database', () => {
 
   beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
     await Blog.deleteMany({})
     await Blog.insertMany(resource.initialBlogs)
   })
@@ -45,6 +48,8 @@ describe('When adding a blog', () => {
   }
 
   beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
     await Blog.deleteMany({})
     await Blog.insertMany(resource.initialBlogs)
   })
@@ -87,6 +92,8 @@ describe('When adding a blog', () => {
 describe('When deleting a blog', () => {
 
   beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
     await Blog.deleteMany({})
     await Blog.insertMany(resource.initialBlogs)
   })
@@ -112,6 +119,8 @@ describe('When deleting a blog', () => {
 describe('When updating a blog', () => {
 
   beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
     await Blog.deleteMany({})
     await Blog.insertMany(resource.initialBlogs)
   })
@@ -135,6 +144,29 @@ describe('When updating a blog', () => {
       .send(blogs[0])
 
     expect(await resource.getBlogs()).toContainEqual(blogs[0])
+  })
+
+})
+
+describe('When a blog has an associated user', () => {
+
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await User.insertMany(resource.initialUsers)
+    await Blog.deleteMany({})
+  })
+
+  test('getting a list of blogs includes user data', async () => {
+    await api.post('/api/blogs').send(resource.initialBlogs[0])
+
+    const response = await api.get('/api/blogs')
+
+    const user = response.body[0].user
+
+    expect(user).toBeDefined()
+    expect(user.id).toBeDefined()
+    expect(user.name).toBeDefined()
+    expect(user.username).toBeDefined()
   })
 
 })

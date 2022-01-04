@@ -15,8 +15,7 @@ const unknownEndpoint = (request, response) => {
 }
 
 const errorHandler = (err, req, res, next) => {
-  logger.info(err.name)
-  logger.error(err.message)
+  logger.error(err)
 
   let errorMessage = err.message
   try {

@@ -7,6 +7,7 @@ const app = require('../app')
 const api = supertest(app)
 
 const User = require('../models/user')
+const Blog = require('../models/blog')
 
 describe('When creating a user', () => {
 
@@ -127,6 +128,33 @@ describe('When database contains users', () => {
     const expectedUsers = mapUsers(resource.initialUsers)
 
     expect(users).toEqual(expect.arrayContaining(expectedUsers))
+  })
+
+})
+
+describe('When user has associated blogs', () => {
+
+  beforeEach(async () => {
+    await User.deleteMany({})
+    await User.create(resource.initialUsers[0])
+    await Blog.deleteMany({})
+  })
+
+  test('getting users includes associated blogs', async () => {
+    await api.post('/api/blogs').send(resource.initialBlogs[0])
+
+    const response = await api.get('/api/users')
+
+    const blogs = response.body[0].blogs
+
+    expect(blogs).toBeDefined()
+
+    const blog = blogs[0]
+
+    expect(blog.id).toBeDefined()
+    expect(blog.title).toBeDefined()
+    expect(blog.author).toBeDefined()
+    expect(blog.url).toBeDefined()
   })
 
 })
