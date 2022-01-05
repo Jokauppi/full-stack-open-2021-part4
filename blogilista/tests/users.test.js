@@ -135,13 +135,15 @@ describe('When database contains users', () => {
 describe('When user has associated blogs', () => {
 
   beforeEach(async () => {
-    await User.deleteMany({})
-    await User.create(resource.initialUsers[0])
+    await resource.initUsers(api)
+    await resource.login(api)
     await Blog.deleteMany({})
   })
 
   test('getting users includes associated blogs', async () => {
-    await api.post('/api/blogs').send(resource.initialBlogs[0])
+    await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .send(resource.initialBlogs[0])
 
     const response = await api.get('/api/users')
 
@@ -150,6 +152,8 @@ describe('When user has associated blogs', () => {
     expect(blogs).toBeDefined()
 
     const blog = blogs[0]
+
+    expect(blog).toBeDefined()
 
     expect(blog.id).toBeDefined()
     expect(blog.title).toBeDefined()

@@ -12,10 +12,9 @@ const User = require('../models/user')
 describe('When there are blogs in the database', () => {
 
   beforeEach(async () => {
-    await User.deleteMany({})
-    await User.insertMany(resource.initialUsers)
-    await Blog.deleteMany({})
-    await Blog.insertMany(resource.initialBlogs)
+    await resource.initUsers(api)
+    await resource.login(api)
+    await resource.initBlogs(api)
   })
 
   test('blogs are returned as JSON', async () => {
@@ -48,14 +47,14 @@ describe('When adding a blog', () => {
   }
 
   beforeEach(async () => {
-    await User.deleteMany({})
-    await User.insertMany(resource.initialUsers)
-    await Blog.deleteMany({})
-    await Blog.insertMany(resource.initialBlogs)
+    await resource.initUsers(api)
+    await resource.login(api)
+    await resource.initBlogs(api)
   })
 
-  test('amount of blogs should increase', async () => {
+  test('amount of blogs should increase with valid token', async () => {
     await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
       .send(newBlog)
       .expect(201)
 
@@ -64,6 +63,7 @@ describe('When adding a blog', () => {
 
   test('database should contain added blog', async () => {
     await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
       .send(newBlog)
 
     expect((await resource.getBlogs()).some(blog =>
@@ -76,6 +76,7 @@ describe('When adding a blog', () => {
 
   test('likes is set to 0 when not specified', async () => {
     let response = await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
       .send({ title: 'blog', author: 'blogger', url: 'blog.example' })
 
     expect(response.body.likes).toEqual(0)
@@ -83,8 +84,16 @@ describe('When adding a blog', () => {
 
   test('returns 400 Bad Request when title and url are missing', async () => {
     await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
       .send({ author: 'blogger' })
       .expect(400)
+  })
+
+  test('returns 401 Unauthorized on invalid token', async () => {
+    await api.post('/api/blogs')
+      .set({ 'authorization': 'Bearer invalidtoken' })
+      .send(newBlog)
+      .expect(401)
   })
 
 })
@@ -92,10 +101,9 @@ describe('When adding a blog', () => {
 describe('When deleting a blog', () => {
 
   beforeEach(async () => {
-    await User.deleteMany({})
-    await User.insertMany(resource.initialUsers)
-    await Blog.deleteMany({})
-    await Blog.insertMany(resource.initialBlogs)
+    await resource.initUsers(api)
+    await resource.login(api)
+    await resource.initBlogs(api)
   })
 
   test('amount of blogs should decrease', async () => {
@@ -151,13 +159,15 @@ describe('When updating a blog', () => {
 describe('When a blog has an associated user', () => {
 
   beforeEach(async () => {
-    await User.deleteMany({})
-    await User.insertMany(resource.initialUsers)
+    await resource.initUsers(api)
+    await resource.login(api)
     await Blog.deleteMany({})
   })
 
   test('getting a list of blogs includes user data', async () => {
-    await api.post('/api/blogs').send(resource.initialBlogs[0])
+    await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .send(resource.initialBlogs[0])
 
     const response = await api.get('/api/blogs')
 
@@ -167,6 +177,20 @@ describe('When a blog has an associated user', () => {
     expect(user.id).toBeDefined()
     expect(user.name).toBeDefined()
     expect(user.username).toBeDefined()
+  })
+
+  test('the associated user is the bearer of the supplied token', async () => {
+    await resource.login(api, resource.initialUsersPasswords[0])
+
+    await api.post('/api/blogs')
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .send(resource.initialBlogs[0])
+
+    const response = await api.get('/api/blogs')
+
+    const user = response.body[0].user
+
+    expect(user.username).toEqual(resource.initialUsersPasswords[0].username)
   })
 
 })
