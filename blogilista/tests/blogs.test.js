@@ -101,27 +101,52 @@ describe('When adding a blog', () => {
 describe('When deleting a blog', () => {
 
   beforeEach(async () => {
-    await resource.initUsers(api)
+    await resource.initUsers(api, [resource.initialUsersPasswords[0]])
     await resource.login(api)
-    await resource.initBlogs(api)
+    await resource.initBlogs(api, [resource.initialBlogs[0]])
   })
 
   test('amount of blogs should decrease', async () => {
     let blogs = await resource.getBlogs()
 
-    await api.delete(`/api/blogs/${blogs[0].id}`).expect(204)
+    await api.delete(`/api/blogs/${blogs[0].id}`)
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .expect(204)
 
-    expect(await resource.getBlogs()).toHaveLength(resource.initialBlogs.length - 1)
+    expect(await resource.getBlogs()).toHaveLength(0)
   })
 
   test('database should not contain deleted blog', async () => {
     let blogs = await resource.getBlogs()
 
     await api.delete(`/api/blogs/${blogs[0].id}`)
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
 
     expect(await resource.getBlogs()).not.toContainEqual(blogs[0])
   })
 
+  test('blog is not deleted with invalid token', async () => {
+    let blogs = await resource.getBlogs()
+
+    await api.delete(`/api/blogs/${blogs[0].id}`)
+      .set({ 'authorization': 'Bearer invalidToken' })
+      .expect(401)
+
+    expect((await resource.getBlogs())[0]).toBeDefined()
+    expect((await resource.getBlogs())[0].id).toEqual(blogs[0].id)
+  })
+
+  test('blog is not deleted with invalid login', async () => {
+    await resource.login(api, { username: 'wronguser', password: 'differentpass' })
+    let blogs = await resource.getBlogs()
+
+    await api.delete(`/api/blogs/${blogs[0].id}`)
+      .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .expect(401)
+
+    expect((await resource.getBlogs())[0]).toBeDefined()
+    expect((await resource.getBlogs())[0].id).toEqual(blogs[0].id)
+  })
 })
 
 describe('When updating a blog', () => {

@@ -5,9 +5,11 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 
 const getAuthId = request => {
-  const decodedToken = jwt.verify(request.token, process.env.JWT_SECRET)
-
-  return decodedToken.id
+  try {
+    return jwt.verify(request.token, process.env.JWT_SECRET).id
+  } catch {
+    return undefined
+  }
 }
 
 blogRouter.get('/', async (request, response) => {
@@ -41,9 +43,20 @@ blogRouter.post('/', async (request, response) => {
 blogRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
 
-  await Blog.findByIdAndDelete(id)
+  const userId = getAuthId(request)
 
-  response.status(204).send()
+  if (!userId) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const user = await User.findById(userId)
+  const blogUserId = (await Blog.findById(id)).user
+
+  if (blogUserId.toString() === user._id.toString()) {
+    await Blog.findByIdAndDelete(id)
+    response.status(204).send()
+  }
+
 })
 
 blogRouter.put('/:id', async (request, response) => {
