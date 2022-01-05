@@ -5,15 +5,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 
 const getAuthId = request => {
-  const authorization = request.get('authorization')
-
-  let token = null
-
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    token = authorization.substring(7)
-  }
-
-  const decodedToken = jwt.verify(token, process.env.JWT_SECRET)
+  const decodedToken = jwt.verify(request.token, process.env.JWT_SECRET)
 
   return decodedToken.id
 }
