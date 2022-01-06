@@ -1,5 +1,9 @@
 const logger = require('./logger')
 const morgan = require('morgan')
+const jwt = require('jsonwebtoken')
+
+const User = require('../models/user')
+
 
 morgan.token('blog', (req) => {
   if (req.method === 'POST') {
@@ -57,9 +61,27 @@ const tokenExtractor = (req, res, next) => {
   next()
 }
 
+const userExtractor = (req, res, next) => {
+
+  tokenExtractor (req, res, async () => {
+    let userId = undefined
+
+    try {
+      userId = jwt.verify(req.token, process.env.JWT_SECRET).id
+    // eslint-disable-next-line no-empty
+    } catch { }
+
+    const user = await User.findById(userId)
+
+    req.user = user
+
+    next()
+  })
+}
+
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  tokenExtractor
+  userExtractor
 }

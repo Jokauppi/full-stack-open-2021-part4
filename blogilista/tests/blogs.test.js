@@ -96,6 +96,12 @@ describe('When adding a blog', () => {
       .expect(401)
   })
 
+  test('returns 401 Unauthorized on missing token', async () => {
+    await api.post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
+  })
+
 })
 
 describe('When deleting a blog', () => {
@@ -142,6 +148,17 @@ describe('When deleting a blog', () => {
 
     await api.delete(`/api/blogs/${blogs[0].id}`)
       .set({ 'authorization': `Bearer ${resource.userToken}` })
+      .expect(401)
+
+    expect((await resource.getBlogs())[0]).toBeDefined()
+    expect((await resource.getBlogs())[0].id).toEqual(blogs[0].id)
+  })
+
+  test('blog is not deleted with missing token', async () => {
+    await resource.login(api, { username: 'wronguser', password: 'differentpass' })
+    let blogs = await resource.getBlogs()
+
+    await api.delete(`/api/blogs/${blogs[0].id}`)
       .expect(401)
 
     expect((await resource.getBlogs())[0]).toBeDefined()
