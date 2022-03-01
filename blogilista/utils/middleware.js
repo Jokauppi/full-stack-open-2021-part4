@@ -1,87 +1,84 @@
-const logger = require('./logger')
-const morgan = require('morgan')
-const jwt = require('jsonwebtoken')
+const logger = require("./logger");
+const morgan = require("morgan");
+const jwt = require("jsonwebtoken");
 
-const User = require('../models/user')
+const User = require("../models/user");
 
-
-morgan.token('blog', (req) => {
-  if (req.method === 'POST') {
-    return JSON.stringify(req.body)
+morgan.token("blog", (req) => {
+  if (req.method === "POST") {
+    return JSON.stringify(req.body);
   }
-  return ' '
-})
+  return " ";
+});
 
-const requestLogger = (morgan(':method :url :status :res[content-length] - :response-time ms :blog'))
+const requestLogger = morgan(
+  ":method :url :status :res[content-length] - :response-time ms :blog"
+);
 
 const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: 'unknown endpoint' })
-}
+  response.status(404).send({ error: "unknown endpoint" });
+};
 
 const errorHandler = (err, req, res, next) => {
+  logger.error(err);
 
-  logger.error(err)
-
-  let errorMessage = err.message
+  let errorMessage = err.message;
 
   try {
-    errorMessage = err.errors[Object.keys(err.errors)[0]].properties.message
-  // eslint-disable-next-line no-empty
-  } catch { }
+    errorMessage = err.errors[Object.keys(err.errors)[0]].properties.message;
+    // eslint-disable-next-line no-empty
+  } catch {}
 
-  if(err.name === 'CastError') {
-    return res.status(400).send({ error: 'malformatted id' })
-  } else if (err.name === 'ValidationError') {
-
-    if (err.message.includes('User validation failed')) {
-      return res.status(400).send({ error: 'User data invalid' })
+  if (err.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  } else if (err.name === "ValidationError") {
+    if (err.message.includes("User validation failed")) {
+      return res.status(400).send({ error: "User data invalid" });
     }
-    return res.status(400).send({ error: errorMessage })
-  } else if (err.name === 'JsonWebTokenError') {
+    return res.status(400).send({ error: errorMessage });
+  } else if (err.name === "JsonWebTokenError") {
     return res.status(401).json({
-      error: 'invalid token'
-    })
+      error: "invalid token",
+    });
   }
 
-  next(err)
-}
+  next(err);
+};
 
 const tokenExtractor = (req, res, next) => {
+  const authorization = req.get("authorization");
 
-  const authorization = req.get('authorization')
+  let token = undefined;
 
-  let token = undefined
-
-  if (authorization && authorization.toLowerCase().startsWith('bearer ')) {
-    token = authorization.substring(7)
+  if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+    token = authorization.substring(7);
   }
 
-  req.token = token
+  req.token = token;
 
-  next()
-}
+  next();
+};
 
 const userExtractor = (req, res, next) => {
-
-  tokenExtractor (req, res, async () => {
-    let userId = undefined
+  tokenExtractor(req, res, async () => {
+    let userId = undefined;
 
     try {
-      userId = jwt.verify(req.token, process.env.JWT_SECRET).id
-    // eslint-disable-next-line no-empty
-    } catch { }
+      userId = jwt.verify(req.token, process.env.JWT_SECRET).id;
+      // eslint-disable-next-line no-empty
+    } catch {}
 
-    const user = await User.findById(userId)
+    const user = await User.findById(userId);
 
-    req.user = user
+    req.user = user;
 
-    next()
-  })
-}
+    next();
+  });
+};
 
 module.exports = {
   requestLogger,
   unknownEndpoint,
   errorHandler,
-  userExtractor
-}
+  userExtractor,
+};
